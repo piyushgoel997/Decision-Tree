@@ -1,6 +1,6 @@
 # training data is full, but testing with missing features
-
 import random
+import time
 from collections import Counter
 
 import numpy as np
@@ -191,32 +191,42 @@ def predict_cls(pred):
 
 def run_exp(X_test, Y_test, tree):
     correct = np.zeros((3,))
+    sampling_times = np.zeros((3,))
+    j = 0
     for x, y in zip(X_test, Y_test):
         temp = np.copy(x)
         for i in random.sample(range(len(x)), random.randint(1, len(x) - 1)):
             temp[i] = -1
+        print(j, "out of", len(Y_test))
+        j += 1
         print(temp)
 
+        s_time = time.time()
         heu = np.copy(temp)
         i = select_heuristic_feature(tree, temp)
         heu[i] = x[i]
         if predict_cls(make_prediction(tree, heu)) == y: correct[0] += 1
-        print(i)
+        sampling_times[0] += time.time() - s_time
 
+        s_time = time.time()
         leu = np.copy(temp)
         i = select_lease_expected_uncertainty_feature(tree, leu)
         leu[i] = x[i]
         if predict_cls(make_prediction(tree, leu)) == y: correct[1] += 1
-        print(i)
+        sampling_times[1] += time.time() - s_time
 
+        s_time = time.time()
         rf = np.copy(temp)
         i = select_random_feature(rf)
         rf[i] = x[i]
         if predict_cls(make_prediction(tree, rf)) == y: correct[2] += 1
-        print(i)
+        sampling_times[2] += time.time() - s_time
     correct /= len(Y_test)
+    sampling_times /= len(sampling_times)
     print("Accuracies ->Random selection =", correct[2], "Heuristic selection =", correct[0],
           "Least Expected Uncertainty =", correct[1])
+    print("Avg sampling time ->Random selection =", sampling_times[2], "Heuristic selection =", sampling_times[0],
+          "Least Expected Uncertainty =", sampling_times[1])
     return correct
 
 
@@ -238,7 +248,9 @@ data = np.load("census.npy", allow_pickle=True)
 #                  gini)
 
 acc = np.zeros((3,))
+start_time = time.time()
 for i in range(NUM_EXPERIMENTS):
+    exp_start_time = time.time()
     np.random.shuffle(data)
     X_train = data[:int(0.8 * len(data)), :-1]
     Y_train = data[:int(0.8 * len(data)), -1]
@@ -254,12 +266,14 @@ for i in range(NUM_EXPERIMENTS):
     print("making tree")
     tree = make_tree(X_train, Y_train, list(range(X_train.shape[1])), list(range(X_train.shape[0])),
                      gini)
-    print("tree made")
+    print("tree made in", time.time() - exp_start_time)
     acc += run_exp(X_test, Y_test, tree)
+    print("Experiment done in", time.time() - exp_start_time)
 acc /= NUM_EXPERIMENTS
 # print(temp_ct)
 print("Averaged Accuracies ->\nRandom selection =", acc[2], "\nHeuristic selection =", acc[0],
       "\nLeast Expected Uncertainty =", acc[1])
+print("total time taken", time.time() - start_time)
 
 # for i in range(X_test.shape[1] + 1):
 #     print_accuracy(X_test, Y_test, tree, remove_features=i)

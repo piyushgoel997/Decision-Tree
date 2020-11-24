@@ -5,7 +5,7 @@ from collections import Counter
 
 import numpy as np
 
-MIN_ELEMENTS = 10
+MIN_ELEMENTS = 1
 NUM_EXPERIMENTS = 1
 
 
@@ -189,14 +189,15 @@ def predict_cls(pred):
     return cls
 
 
-def run_exp(X_test, Y_test, tree):
+def run_exp(X_test, Y_test, tree, remove_ratio=0.5):
     correct = np.zeros((3,))
     sampling_times = np.zeros((3,))
     j = 0
     for x, y in zip(X_test, Y_test):
         temp = np.copy(x)
-        for i in random.sample(range(len(x)), random.randint(1, len(x) - 1)):
-            temp[i] = -1
+        for i in range(len(x)):
+            if random.random() < remove_ratio:
+                temp[i] = -1
         print(j, "out of", len(Y_test))
         j += 1
         print(temp)
@@ -222,12 +223,12 @@ def run_exp(X_test, Y_test, tree):
         if predict_cls(make_prediction(tree, rf)) == y: correct[2] += 1
         sampling_times[2] += time.time() - s_time
     correct /= len(Y_test)
-    sampling_times /= len(sampling_times)
+    sampling_times /= len(Y_test)
     print("Accuracies ->Random selection =", correct[2], "Heuristic selection =", correct[0],
           "Least Expected Uncertainty =", correct[1])
     print("Avg sampling time ->Random selection =", sampling_times[2], "Heuristic selection =", sampling_times[0],
           "Least Expected Uncertainty =", sampling_times[1])
-    return correct
+    return correct, sampling_times
 
 
 # load data
@@ -247,7 +248,9 @@ data = np.load("census.npy", allow_pickle=True)
 # tree = make_tree(X_train, Y_train, list(range(X_train.shape[1])), list(range(X_train.shape[0])),
 #                  gini)
 
-acc = np.zeros((3,))
+remove_ratios = [0.25, 0.50, 0.75]
+acc = np.zeros((len(remove_ratios), 3))
+sampling_times = np.zeros((len(remove_ratios), 3))
 start_time = time.time()
 for i in range(NUM_EXPERIMENTS):
     exp_start_time = time.time()
@@ -267,12 +270,24 @@ for i in range(NUM_EXPERIMENTS):
     tree = make_tree(X_train, Y_train, list(range(X_train.shape[1])), list(range(X_train.shape[0])),
                      gini)
     print("tree made in", time.time() - exp_start_time)
-    acc += run_exp(X_test, Y_test, tree)
+    for j, r in enumerate(remove_ratios):
+        a, s = run_exp(X_test, Y_test, tree, remove_ratio=r)
+        acc[j] += a
+        sampling_times[j] += s
     print("Experiment done in", time.time() - exp_start_time)
-acc /= NUM_EXPERIMENTS
+for i in range(len(remove_ratios)):
+    acc[i] /= NUM_EXPERIMENTS
 # print(temp_ct)
-print("Averaged Accuracies ->\nRandom selection =", acc[2], "\nHeuristic selection =", acc[0],
-      "\nLeast Expected Uncertainty =", acc[1])
+for a, s, r in zip(acc, sampling_times, remove_ratios):
+    print("==========================================================")
+    print("Remove ratio =", r)
+    print()
+    print("Averaged Accuracies ->\nRandom selection =", a[2], "\nHeuristic selection =", a[0],
+          "\nLeast Expected Uncertainty =", a[1])
+    print()
+    print("Averaged sampling times ->\nRandom selection =", s[2], "\nHeuristic selection =", s[0],
+          "\nLeast Expected Uncertainty =", s[1])
+    print("==========================================================")
 print("total time taken", time.time() - start_time)
 
 # for i in range(X_test.shape[1] + 1):

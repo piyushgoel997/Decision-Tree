@@ -1,12 +1,14 @@
 # training data is full, but testing with missing features
+import argparse
 import random
+import sys
 import time
 from collections import Counter
 
 import numpy as np
 
-MIN_ELEMENTS = 1
-NUM_EXPERIMENTS = 1
+MIN_ELEMENTS = 5
+NUM_EXPERIMENTS = 5
 
 
 def gini(Y, ind):
@@ -231,84 +233,94 @@ def run_exp(X_test, Y_test, tree, remove_ratio=0.5):
     return correct, sampling_times
 
 
-# load data
-data = np.load("census.npy", allow_pickle=True)
-# np.random.shuffle(data)
-# X_train = data[:int(0.8 * len(data)), :-1]
-# Y_train = data[:int(0.8 * len(data)), -1]
-#
-# features = {}
-# for i in range(X_train.shape[1]):
-#     features[i] = Counter(X_train[:, i])
-# # print(features)
-# X_test = data[int(0.8 * len(data)):, :-1]
-# Y_test = data[int(0.8 * len(data)):, -1]
-#
-# # make tree
-# tree = make_tree(X_train, Y_train, list(range(X_train.shape[1])), list(range(X_train.shape[0])),
-#                  gini)
+if __name__ == "__main__":
 
-remove_ratios = [0.25, 0.50, 0.75]
-acc = np.zeros((len(remove_ratios), 3))
-sampling_times = np.zeros((len(remove_ratios), 3))
-start_time = time.time()
-for i in range(NUM_EXPERIMENTS):
-    exp_start_time = time.time()
-    np.random.shuffle(data)
-    X_train = data[:int(0.8 * len(data)), :-1]
-    Y_train = data[:int(0.8 * len(data)), -1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data')
+    args = parser.parse_args()
 
-    features = {}
-    for i in range(X_train.shape[1]):
-        features[i] = Counter(X_train[:, i])
-    print(features)
-    X_test = data[int(0.8 * len(data)):, :-1]
-    Y_test = data[int(0.8 * len(data)):, -1]
+    sys.stdout = open(args.data + "-log.txt", "w")
 
-    # make tree
-    print("making tree")
-    tree = make_tree(X_train, Y_train, list(range(X_train.shape[1])), list(range(X_train.shape[0])),
-                     gini)
-    print("tree made in", time.time() - exp_start_time)
-    for j, r in enumerate(remove_ratios):
-        a, s = run_exp(X_test, Y_test, tree, remove_ratio=r)
-        acc[j] += a
-        sampling_times[j] += s
-    print("Experiment done in", time.time() - exp_start_time)
-for i in range(len(remove_ratios)):
-    acc[i] /= NUM_EXPERIMENTS
-# print(temp_ct)
-for a, s, r in zip(acc, sampling_times, remove_ratios):
-    print("==========================================================")
-    print("Remove ratio =", r)
-    print()
-    print("Averaged Accuracies ->\nRandom selection =", a[2], "\nHeuristic selection =", a[0],
-          "\nLeast Expected Uncertainty =", a[1])
-    print()
-    print("Averaged sampling times ->\nRandom selection =", s[2], "\nHeuristic selection =", s[0],
-          "\nLeast Expected Uncertainty =", s[1])
-    print("==========================================================")
-print("total time taken", time.time() - start_time)
+    # load data
+    data = np.load(args.data + ".npy", allow_pickle=True)
+    # np.random.shuffle(data)
+    # X_train = data[:int(0.8 * len(data)), :-1]
+    # Y_train = data[:int(0.8 * len(data)), -1]
+    #
+    # features = {}
+    # for i in range(X_train.shape[1]):
+    #     features[i] = Counter(X_train[:, i])
+    # # print(features)
+    # X_test = data[int(0.8 * len(data)):, :-1]
+    # Y_test = data[int(0.8 * len(data)):, -1]
+    #
+    # # make tree
+    # tree = make_tree(X_train, Y_train, list(range(X_train.shape[1])), list(range(X_train.shape[0])),
+    #                  gini)
 
-# for i in range(X_test.shape[1] + 1):
-#     print_accuracy(X_test, Y_test, tree, remove_features=i)
-# accuracy = 0.9335260115606936 features removed = 0
-# accuracy = 0.8294797687861272 features removed = 1
-# accuracy = 0.7630057803468208 features removed = 2
-# accuracy = 0.7196531791907514 features removed = 3
-# accuracy = 0.7167630057803468 features removed = 4
-# accuracy = 0.7167630057803468 features removed = 5
-# accuracy = 0.7167630057803468 features removed = 6
+    remove_ratios = [0.25, 0.50, 0.75]
+    acc = np.zeros((len(remove_ratios), 3))
+    sampling_times = np.zeros((len(remove_ratios), 3))
+    start_time = time.time()
+    for i in range(NUM_EXPERIMENTS):
+        exp_start_time = time.time()
+        np.random.shuffle(data)
+        X_train = data[:int(0.8 * len(data)), :-1]
+        Y_train = data[:int(0.8 * len(data)), -1]
 
-# features removed = 0 accuracy = [0.93352601]
-# features removed = 1 accuracy = [0.8150289  0.93352601]
-# features removed = 2 accuracy = [0.75433526 0.83815029 0.77456647]
-# features removed = 3 accuracy = [0.71965318 0.80635838 0.75144509 0.73410405]
-# features removed = 4 accuracy = [0.69942197 0.76300578 0.71098266 0.70809249 0.70520231]
-# features removed = 5 accuracy = [0.6849711  0.70809249 0.69364162 0.68208092 0.6849711  0.6849711 ]
-# features removed = 6 accuracy = [0.6849711 0.6849711 0.6849711 0.6849711 0.6849711 0.6849711 0.6849711]
+        features = {}
+        for i in range(X_train.shape[1]):
+            features[i] = Counter(X_train[:, i])
+        print(features)
+        X_test = data[int(0.8 * len(data)):, :-1]
+        Y_test = data[int(0.8 * len(data)):, -1]
 
-# Averaged Accuracies ->
-# Random selection = 0.7873988439306359
-# Heuristic selection = 0.8106647398843928
-# Least Expected Uncertainty = 0.8182658959537573
+        # make tree
+        print("making tree")
+        tree = make_tree(X_train, Y_train, list(range(X_train.shape[1])), list(range(X_train.shape[0])),
+                         gini)
+        print("tree made in", time.time() - exp_start_time)
+        for j, r in enumerate(remove_ratios):
+            a, s = run_exp(X_test, Y_test, tree, remove_ratio=r)
+            acc[j] += a
+            sampling_times[j] += s
+        print("Experiment done in", time.time() - exp_start_time)
+    for i in range(len(remove_ratios)):
+        acc[i] /= NUM_EXPERIMENTS
+    # print(temp_ct)
+    for a, s, r in zip(acc, sampling_times, remove_ratios):
+        print("==========================================================")
+        print("Remove ratio =", r)
+        print()
+        print("Averaged Accuracies ->\nRandom selection = {:.5f}\nHeuristic selection = {:.5f}\n"
+              "Least Expected Uncertainty = {:.5f}".format(a[2], a[0], a[1]))
+        print()
+        print("Averaged sampling times ->\nRandom selection = {:.5f}\nHeuristic selection = {:.5f}\n"
+              "Least Expected Uncertainty = {:.5f}".format(s[2], s[0], s[1]))
+        print("==========================================================")
+    print("total time taken", time.time() - start_time)
+    print("Class counts in the data", Counter(list(data[:, -1])))
+    print("Number of total instances =", data.shape[0], "\nNumber of attributes =", data.shape[1])
+
+    # for i in range(X_test.shape[1] + 1):
+    #     print_accuracy(X_test, Y_test, tree, remove_features=i)
+    # accuracy = 0.9335260115606936 features removed = 0
+    # accuracy = 0.8294797687861272 features removed = 1
+    # accuracy = 0.7630057803468208 features removed = 2
+    # accuracy = 0.7196531791907514 features removed = 3
+    # accuracy = 0.7167630057803468 features removed = 4
+    # accuracy = 0.7167630057803468 features removed = 5
+    # accuracy = 0.7167630057803468 features removed = 6
+
+    # features removed = 0 accuracy = [0.93352601]
+    # features removed = 1 accuracy = [0.8150289  0.93352601]
+    # features removed = 2 accuracy = [0.75433526 0.83815029 0.77456647]
+    # features removed = 3 accuracy = [0.71965318 0.80635838 0.75144509 0.73410405]
+    # features removed = 4 accuracy = [0.69942197 0.76300578 0.71098266 0.70809249 0.70520231]
+    # features removed = 5 accuracy = [0.6849711  0.70809249 0.69364162 0.68208092 0.6849711  0.6849711 ]
+    # features removed = 6 accuracy = [0.6849711 0.6849711 0.6849711 0.6849711 0.6849711 0.6849711 0.6849711]
+
+    # Averaged Accuracies ->
+    # Random selection = 0.7873988439306359
+    # Heuristic selection = 0.8106647398843928
+    # Least Expected Uncertainty = 0.8182658959537573

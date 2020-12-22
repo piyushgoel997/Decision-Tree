@@ -202,7 +202,7 @@ if __name__ == "__main__":
     sys.stdout = open("logs/" + args.data + ".txt", "w")
 
     # load data
-    data = np.load(args.data + ".npy", allow_pickle=True)
+    data = np.load("data/" + args.data + ".npy", allow_pickle=True)
     feature_cols = np.load(args.data + "_fc.npy")
     remove_ratios = [0.25, 0.50, 0.75]
     acc = np.zeros((len(remove_ratios), 4))

@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
     # load data
     data = np.load("data/" + args.data + ".npy", allow_pickle=True)
-    feature_cols = np.load(args.data + "_fc.npy")
+    feature_cols = np.load("data/" + args.data + "_fc.npy")
     remove_ratios = [0.25, 0.50, 0.75]
     acc = np.zeros((len(remove_ratios), 4))
     complete_accuracy = 0

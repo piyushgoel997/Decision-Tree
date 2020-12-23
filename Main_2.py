@@ -9,7 +9,7 @@ from Experiments import predict_cls, Experiment
 from Tree import make_prediction, make_tree
 
 MIN_ELEMENTS = 1
-NUM_EXPERIMENTS = 1
+NUM_EXPERIMENTS = 10
 
 
 def complete_data_test(X_test, Y_test, tree):

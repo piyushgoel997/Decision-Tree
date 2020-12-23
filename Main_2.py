@@ -5,7 +5,7 @@ from collections import Counter
 
 import numpy as np
 
-from Parallelized_experiments import predict_cls, Experiment
+from Experiments import predict_cls, Experiment
 from Tree import make_prediction, make_tree
 
 MIN_ELEMENTS = 1

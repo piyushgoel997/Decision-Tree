@@ -9,6 +9,13 @@ from Sampling_techniques import select_random_feature, select_lease_expected_unc
 from Tree import make_prediction, predict_cls
 
 
+def complete_data_test(X_test, Y_test, tree):
+    correct = 0
+    for x, y in zip(X_test, Y_test):
+        if predict_cls(make_prediction(tree, x)) == y: correct += 1
+    return correct / len(Y_test)
+
+
 class Experiment:
 
     def __init__(self, tree, feature_cols, remove_ratio, features):

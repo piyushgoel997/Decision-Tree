@@ -5,19 +5,10 @@ from collections import Counter
 
 import numpy as np
 
-from Experiments import predict_cls, Experiment
-from Tree import make_prediction, make_tree
+from Experiments import Experiment, complete_data_test
+from Tree import make_tree
 
-MIN_ELEMENTS = 1
 NUM_EXPERIMENTS = 10
-
-
-def complete_data_test(X_test, Y_test, tree):
-    correct = 0
-    for x, y in zip(X_test, Y_test):
-        if predict_cls(make_prediction(tree, x)) == y: correct += 1
-    return correct / len(Y_test)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -76,7 +67,7 @@ if __name__ == "__main__":
         print("==========================================================")
     print("Accuracy with complete data = {:.5f}".format(complete_accuracy))
     print("Accuracy of trivial classifier = {:.5f}".format(
-        max(sum(data[:, -1])/len(data[:, -1]), (len(data[:, -1]) - sum(data[:, -1]))/len(data[:, -1]))))
+        max(sum(data[:, -1]) / len(data[:, -1]), (len(data[:, -1]) - sum(data[:, -1])) / len(data[:, -1]))))
     print("total time taken", time.time() - start_time)
     print("Class counts in the data", Counter(list(data[:, -1])))
     print("Number of total instances =", data.shape[0], "\nNumber of attributes =", data.shape[1])

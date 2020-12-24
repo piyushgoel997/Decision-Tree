@@ -1,4 +1,5 @@
 import random
+
 import numpy as np
 
 from Tree import make_prediction2
@@ -17,6 +18,13 @@ def select_heuristic_feature(tree, x):
 
 def calc_uncertainty(predictions):
     return 1 - max(predictions.values())
+
+
+def cal_uncertainty2(predictions):
+    u = 1
+    for p in predictions:
+        u *= p
+    return u
 
 
 def select_lease_expected_uncertainty_feature(tree, incomplete_x, features):

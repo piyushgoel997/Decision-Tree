@@ -2,7 +2,6 @@ import argparse
 from os import listdir
 from os.path import isfile, join
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--path')

@@ -75,8 +75,8 @@ if __name__ == "__main__":
               "Heuristic selection = {:.5f}\nLeast Expected Uncertainty = {:.5f}".format(s[3], s[2], s[0], s[1]))
         print("==========================================================")
     print("Accuracy with complete data = {:.5f}".format(complete_accuracy))
-    print("Accuracy of trivial classifier =", max(sum(data[:, -1])/len(data[:, -1]),
-                                                  (len(data[:, -1]) - sum(data[:, -1]))/len(data[:, -1])))
+    print("Accuracy of trivial classifier = {:.5f}".format(
+        max(sum(data[:, -1])/len(data[:, -1]), (len(data[:, -1]) - sum(data[:, -1]))/len(data[:, -1]))))
     print("total time taken", time.time() - start_time)
     print("Class counts in the data", Counter(list(data[:, -1])))
     print("Number of total instances =", data.shape[0], "\nNumber of attributes =", data.shape[1])

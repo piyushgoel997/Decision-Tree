@@ -69,7 +69,7 @@ class Experiment:
         correct = np.zeros((4,))
         sampling_times = np.zeros((4,))
         pool = Pool()
-        res = pool.imap_unordered(self.single_experiment, zip(X_test, Y_test))
+        res = pool.map(self.single_experiment, zip(X_test, Y_test))
         for c, st in res:
             correct += c
             sampling_times += st
